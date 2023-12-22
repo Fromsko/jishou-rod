@@ -117,12 +117,13 @@ func getCnameData(c *gin.Context) {
 
 	// 读取指定目录下的JSON文件
 	data, err := readJSONData(week)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, gin.H{"code":200, "data":data})
 }
 
 func getCnameTable(c *gin.Context) {
