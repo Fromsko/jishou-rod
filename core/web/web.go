@@ -2,6 +2,7 @@ package web
 
 import (
 	"JishouSchedule/core/tasks"
+	"JishouSchedule/core/tasks/spider"
 	"JishouSchedule/core/tools/common"
 	"JishouSchedule/core/tools/config"
 	"context"
@@ -50,9 +51,7 @@ func StartServer(port string) {
 	})
 	router.Use(Cors())
 
-	router.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"code": 200, "msg": "主页"})
-	})
+	router.GET("/", indexPage)
 	api := router.Group("/api/v1")
 	{
 		api.GET("/get_cname_data", getCnameData)
@@ -104,6 +103,10 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
+func indexPage(ctx *gin.Context) {
+	ctx.JSON(200, gin.H{"code": 200, "msg": "主页"})
+}
+
 func getCnameData(c *gin.Context) {
 	weekStr := c.Query("week")
 	week, err := strconv.Atoi(weekStr)
@@ -115,7 +118,7 @@ func getCnameData(c *gin.Context) {
 	// 读取指定目录下的JSON文件
 	data, err := readJSONData(week)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read JSON data"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
@@ -143,12 +146,11 @@ func getCnameTable(c *gin.Context) {
 func readJSONData(week int) (result map[string]any, err error) {
 	search := fmt.Sprintf("第%d周", week)
 	err = common.ReadFilesWithCallback(
-		common.GenPath("cache", "data"),
+		spider.DataPath,
 		search,
-		func(filePath string) error {
-			content, _ := os.ReadFile(filePath)
+		func(fp string) error {
+			content, _ := os.ReadFile(fp)
 			_ = json.Unmarshal(content, &result)
-
 			if result == nil {
 				result = map[string]any{
 					"search": search,
@@ -166,7 +168,7 @@ func readJSONData(week int) (result map[string]any, err error) {
 func generateImage(week int) (imagePath string, err error) {
 	search := fmt.Sprintf("第%d周", week)
 	err = common.ReadFilesWithCallback(
-		common.GenPath("cache", "output"),
+		spider.OutputPath,
 		search,
 		func(filePath string) (err error) {
 			if filePath == "" {

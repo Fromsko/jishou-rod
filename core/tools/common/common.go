@@ -68,14 +68,13 @@ func ReadFilesWithCallback(directory, queryFilename string, callback func(filePa
 		if !file.IsDir() {
 			filename := file.Name()
 			filePath := filepath.Join(directory, filename)
-
 			if extractWeek(filename) == queryFilename {
-				if err := callback(filePath); err != nil {
-					return err
-				}
+				fmt.Println(extractWeek(filename), queryFilename)
+				return callback(filePath)
 			}
 		}
 	}
+
 	return errors.New("未找到")
 }
 

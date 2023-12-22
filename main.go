@@ -14,7 +14,6 @@ func main() {
 		web.StartServer(tasks.DefaultPort)
 	}
 
-	interfaces.PushWechat()
 	go web.AutoTask("0 0 */12 * * ?", interfaces.SpiderRod)
 	go web.AutoTask("0 0 7 * * ?", interfaces.PushWechat)
 	select {}
